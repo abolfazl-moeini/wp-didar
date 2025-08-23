@@ -13,7 +13,7 @@ Domain Path: /lang
 
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
-function isHPOSenabled(): bool {
+function did_is_HPOS_enabled(): bool {
 
     return OrderUtil::custom_orders_table_usage_is_enabled();
 }
@@ -139,7 +139,7 @@ function didar_send_all_order_function() {
         $to     = $opt['order_count'] ?? 20;
         $status = implode( "','", $opt['status'] );
 
-        if ( isHPOSenabled() ) {
+        if ( did_is_HPOS_enabled() ) {
 
             $rows = $wpdb->get_results( $wpdb->prepare( "
 		select * from {$wpdb->prefix}wc_orders o 

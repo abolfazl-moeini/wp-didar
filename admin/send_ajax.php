@@ -10,7 +10,7 @@ global $wpdb;
     $status = implode( "','", array_keys( $opt['status'] ) );
     $from   = $opt['order_start'] ?? 0;
 
-    if ( isHPOSenabled() ) {
+    if ( did_is_HPOS_enabled() ) {
         $cnt = $wpdb->get_var( $wpdb->prepare( "
 	select count(ID) from {$wpdb->prefix}wc_orders o 
 	where o.type='shop_order' and o.status in(%s)

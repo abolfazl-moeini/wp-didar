@@ -189,7 +189,7 @@ class did_hooks {
         $status = implode( "','", array_keys( $opt['status'] ) );
         $oid    = empty( $_POST['oid'] ) ? 0 : $_POST['oid'];
 
-        if ( isHPOSenabled() ) {
+        if ( did_is_HPOS_enabled() ) {
 
             $row = $wpdb->get_row( $wpdb->prepare( "
 		select * from {$wpdb->prefix}wc_orders o 
