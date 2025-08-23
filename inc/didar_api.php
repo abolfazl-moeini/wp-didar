@@ -40,7 +40,9 @@ class didar_api {
 			}
 
 			return $resp;
+
 		} else {
+
 			add_errorlog( self::$order_id, $router, $params, $response );
 		}
 	}
@@ -56,13 +58,19 @@ class didar_api {
 
 
 	private static function get_price( $product_id ) {
+
 		if ( $price = get_post_meta( $product_id, '_sale_price', true ) ) {
+
 			return $price;
 		}
+
 		if ( $price = get_post_meta( $product_id, '_regular_price', true ) ) {
+
 			return $price;
 		}
+
 		if ( $price = get_post_meta( $product_id, '_price', true ) ) {
+
 			return $price;
 		}
 	}
@@ -86,7 +94,7 @@ class didar_api {
 		}
 		$resp = self::send_request( 'contact/save', [ 'Contact' => $args ] );
 
-		return isset( $resp->Response ) ? $resp->Response : $resp;
+		return $resp->Response ?? $resp;
 	}
 
 	public static function has_product( $pid ) {
@@ -144,18 +152,22 @@ class didar_api {
 			'ProductCategoryId' => '313180cb-29c4-45ec-918c-aecc3229c3af',
 			'Variants'          => []
 		];
+
 		if ( empty( $item->get_variation_id() ) ) {
+
 			$args['UnitPrice'] = did_fix_price( $item->get_subtotal() );
 		}
 
 
 		if ( $didar = get_post_meta( $item->get_product_id(), 'didar_id', true ) ) {
+
 			$args['Id'] = $didar;
 		}
 
 
 		$variations = $wpdb->get_results( $wpdb->prepare( "select * from $wpdb->posts where post_type='product_variation' and post_status='publish' and post_parent= %d",
 			$item->get_product_id() ) );
+
 		if ( ! empty( $variations ) ) {
 
 			foreach ( $variations as $i => $variation ) {
@@ -168,7 +180,9 @@ class didar_api {
 					'TitleForInvoice' => $variation->post_title,
 					'IsDefault'       => false
 				];
+
 				if ( $didid = get_post_meta( $variation->ID, 'didar_id', true ) ) {
+
 					$args['Variants'][ $i ]['Id']        = $didid;
 					$args['Variants'][ $i ]['ProductId'] = $didar;
 				}
@@ -178,15 +192,21 @@ class didar_api {
 		$product = self::send_request( 'product/save', [ 'Product' => $args ] );
 
 		if ( ! isset( $product->Response ) ) {
+
 			return $product;
 		}
+
 		$product = $product->Response;
 
 		if ( isset( $product->Id ) ) {
+
 			update_post_meta( $item->get_product_id(), 'didar_id', $product->Id );
 		}
+
 		if ( ! empty( $product->Variants ) ) {
+
 			foreach ( $product->Variants as $variant ) {
+
 				update_post_meta( did_get_variation_id_by_sku( $variant->VariantCode ), 'didar_id', $variant->Id );
 				//update_post_meta($variant->VariantCode, 'didar_id',$variant->Id);
 			}
@@ -198,10 +218,12 @@ class didar_api {
 	}
 
 	public static function get_category() {
+
 		return self::send_request( 'product/categories', [] )->Response;
 	}
 
 	public static function create_order( $args = [] ) {
+
 		return self::send_request( 'deal/save', $args );
 	}
 
@@ -212,6 +234,7 @@ class didar_api {
 		$opt   = get_option( 'did_option', [] );
 		$order = new WC_Order( $order_id );
 		$ostat = $order->get_status();
+
 		if ( empty( $opt['status'][ 'wc-' . $ostat ] ) ) {
 			return false;
 		}
@@ -242,6 +265,7 @@ class didar_api {
 		];
 
 		if ( $cfield = get_option( 'didar_field_contact', [] ) ) {
+
 			$fields = [];
 			$uid    = get_post_meta( $order_id, '_customer_user', true );
 			foreach ( $cfield as $field ) {
@@ -249,21 +273,25 @@ class didar_api {
 			}
 			$args['Fields'] = $fields;
 		}
+
 		$user = self::create_user( $args );
+
 		if ( ! isset( $user->Id ) ) {
 			return $user;
 		}
 
 		$product = [];
 		$items   = $order->get_items();
+
 		foreach ( $items as $item ) {
+
 			$did_prod = self::create_product( $item );
 			if ( is_object( $did_prod ) ) {
 				return $did_prod;
 			}
 
-
 			$price = intval( $item->get_subtotal() / $item->get_quantity() );
+
 			$price = did_fix_price( $price );
 
 			$product[] = [
@@ -287,7 +315,7 @@ class didar_api {
 			default:$status=0;break;
 		}*/
 		$price = did_fix_price( $order->get_total() );
-		$soid  = ( isset( $opt['soid'] ) and $opt['soid'] == 'on' ) ? " $order_id" : '';
+		$soid  = ( isset( $opt['soid'] ) && $opt['soid'] === 'on' ) ? " $order_id" : '';
 		$owner = '';
 		if ( $opt['same_person'] == 1 ) {
 			$owner = get_user_meta( $order->get_customer_id(), 'didar_deal_person', true );
@@ -309,11 +337,13 @@ class didar_api {
 			'TaxPercent'      => $tax,
 			//'RegisterDate'  => $order->get_date_created(),
 			'IsPaid'          => true,
-			'IsWon'           => ( $status == 1 ? true : false ),
+			'IsWon'           => $status == 1,
 			'OwnerId'         => $owner,//$opt['user'],
-			'PipelineStageId' => ( isset( $opt['kariz'] ) ? $opt['kariz'] : '' ),
+			'PipelineStageId' => ( $opt['kariz'] ?? '' ),
 		];
+
 		if ( $cfield = get_option( 'didar_field_deal', [] ) ) {
+
 			$fields = [];
 			foreach ( $cfield as $field ) {
 				$fields[ $field['didar'] ] = get_post_meta( $order_id, $field['wp'], true );
@@ -327,12 +357,11 @@ class didar_api {
 
 		//var_dump(['Deal'=>$args,'DealItems'=>$product]);
 		//var_dump($out);
-		return isset( $out->Response ) ? $out->Response : $out;
+		return $out->Response ?? $out;
 	}
 
 	public static function get_custom_fields() {
+
 		return self::send_request( 'customfield/GetCustomfieldList', [] );
 	}
-
-
 }

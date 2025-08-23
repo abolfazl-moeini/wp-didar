@@ -5,8 +5,10 @@
     //var_dump($ver);
     //if(isset($_POST['save'])){
     if ( isset( $_POST['save'] ) && wp_verify_nonce( $_POST['didar_settings_nonce'], 'didar_settings' ) ) {
+
         $_POST['status']['wc-completed'] = 1;
         update_option( 'did_option', $_POST );
+
         echo '<div id="setting-error-settings_updated" class="notice notice-success settings-error is-dismissible"><p><strong>' . esc_html__( 'Settings saved',
                         'didar' ) . '</strong></p></div>';
     }
@@ -15,9 +17,9 @@
     $type        = empty( $opt['send_type'] ) ? 1 : $opt['send_type'];
     $soid        = empty( $opt['soid'] ) ? '' : $opt['soid'];
     $nonce       = wp_create_nonce( 'didar_settings' );
-    $sku         = isset( $opt['sku'] ) ? $opt['sku'] : 0;
-    $same_person = isset( $opt['same_person'] ) ? $opt['same_person'] : 0;
-    $price_type  = isset( $opt['price_type'] ) ? $opt['price_type'] : 'IRT';
+    $sku         = $opt['sku'] ?? 0;
+    $same_person = $opt['same_person'] ?? 0;
+    $price_type  = $opt['price_type'] ?? 'IRT';
 
     $woo_status = [
         //'draft'=>__('Draft', 'didar'),
@@ -59,7 +61,7 @@
                     <table>
                         <?php
                         foreach ( $woo_status as $key => $title ) {
-                            $checked  = ( isset( $status[ $key ] ) or $key == 'completed' ) ? 'checked="checked"' : '';
+                            $checked  = ( isset( $status[ $key ] ) || $key == 'completed' ) ? 'checked="checked"' : '';
                             $selected = empty( $status[ $key ] ) ? ( $key == 'completed' ? 1 : '' ) : $status[ $key ];
 
                             echo '

@@ -1,6 +1,7 @@
 <?php
 
 class did_hooks {
+
     public function __construct() {
         add_action( 'init', [ $this, 'init' ] );
         /**
@@ -26,52 +27,63 @@ class did_hooks {
 
     }
 
-    function init() {
-        if ( is_admin() and $_GET['page'] == 'custom_fields' ) {
+    public function init(): void {
+
+        if ( isset( $_GET['page'] ) && $_GET['page'] === 'custom_fields' && is_admin() ) {
+
             $url = admin_url( 'admin.php?page=custom_fields' );
-            if ( ! isset( $_GET['tab'] ) or ! in_array( $_GET['tab'], [ 'contact', 'deal' ] ) ) {
+
+            if ( ! isset( $_GET['tab'] ) && ! in_array( $_GET['tab'], [ 'contact', 'deal' ] ) ) {
+
                 wp_redirect( "$url&tab=contact" );
                 exit;
             }
         }
     }
 
-    function admin_menu() {
+    public function admin_menu(): void {
+
         add_menu_page( esc_html__( 'Didar CRM', 'didar' )
                 , esc_html__( 'Didar CRM', 'didar' )
                 , 'administrator'
                 , 'did_managment'
                 , [ $this, 'did_managment' ]
-                , plugins_url( 'assets/images/logo.png', dirname( __FILE__ ) )
+                , plugins_url( 'assets/images/logo.png', __DIR__ )
         );
+
         add_submenu_page( 'did_managment'
                 , esc_html__( 'Send to Didar', 'didar' )
                 , esc_html__( 'Send to Didar', 'didar' )
                 , 'administrator'
                 , 'did_send_ajax'
                 , [ $this, 'did_send_ajax' ]
-                , plugins_url( 'assets/images/logo.png', dirname( __FILE__ ) )
+                , plugins_url( 'assets/images/logo.png', __DIR__ )
         );
+
         add_submenu_page( 'did_managment', esc_html__( 'Reset service', 'didar' ),
                 esc_html__( 'Reset service', 'didar' ), 'administrator', 'did_reset_service',
                 [ $this, 'did_reset_service' ] );
+
         add_submenu_page( 'did_managment', esc_html__( 'Custom fields', 'didar' ),
                 esc_html__( 'Custom fields', 'didar' ), 'administrator', 'custom_fields',
                 [ $this, 'did_custom_fields' ] );
+
         add_submenu_page( 'did_managment', esc_html__( 'Error log', 'didar' ), esc_html__( 'Error log', 'didar' ),
                 'administrator', 'did_errorlog', [ $this, 'did_errorlog' ] );
     }
 
 
-    public static function didar_hourly_send() {
+    public static function didar_hourly_send(): void {
+        global $wpdb;
+
         //did_hooks::didar_send_all_order();
         $opt  = get_option( 'did_option', [] );
-        $from = isset( $opt['order_start'] ) ? $opt['order_start'] : 0;
-        if ( isset( $opt['send_type'] ) and $opt['send_type'] == 2 ) {
+        $from = $opt['order_start'] ?? 0;
+
+        if ( isset( $opt['send_type'] ) && $opt['send_type'] == 2 ) {
             return;
         }
 
-        global $wpdb;
         $status = implode( "','", array_keys( $opt['status'] ) );
         $rows   = $wpdb->get_results( $wpdb->prepare( "select id from {$wpdb->prefix}wc_orders wo where wo.status in(%s) 
         and not exists(select post_id from $wpdb->postmeta where post_id=wo.id and meta_key='didar_id' and meta_value<>'') order by id limit %d",
@@ -85,51 +97,51 @@ class did_hooks {
             if ( $didar === false ) {
                 continue;
             }
-            if ( isset( $didar->Error ) or isset( $didar->Message ) ) {
+            if ( isset( $didar->Error ) || isset( $didar->Message ) ) {
+
                 update_post_meta( $row->id, 'didar_msg',
-                        ( isset( $didar->Message ) ? $didar->Message : $didar->Error ) );
+                        ( $didar->Message ?? $didar->Error ) );
             } else {
                 update_post_meta( $row->id, 'didar_id', $didar->Id );
             }
         }
     }
 
-    function did_managment() {
-        include_once( did_path . 'admin' . ds . 'config.php' );
+    public function did_managment(): void {
+        include_once( DID_PATH . 'admin/config.php' );
     }
 
-    function did_send_ajax() {
-        include_once( did_path . 'admin' . ds . 'send_ajax.php' );
+    public function did_send_ajax(): void {
+        include_once( DID_PATH . 'admin/send_ajax.php' );
     }
 
-    function did_errorlog() {
-        include_once( did_path . 'admin' . ds . 'error_log.php' );
+    public function did_errorlog(): void {
+        include_once( DID_PATH . 'admin/error_log.php' );
     }
 
-    function did_reset_service() {
-        include_once( did_path . 'admin' . ds . 'reset.php' );
+    public function did_reset_service(): void {
+        include_once( DID_PATH . 'admin/reset.php' );
     }
 
-    function did_custom_fields() {
-        include_once( did_path . 'admin' . ds . 'custom_fields.php' );
+    public function did_custom_fields(): void {
+        include_once( DID_PATH . 'admin/custom_fields.php' );
     }
 
-    function add_custom_shop_order_column( $columns ) {
+    public function add_custom_shop_order_column( $columns ): array {
 
         $columns['didar_status'] = esc_html__( 'Didar Status', 'didar' );
 
         return $columns;
     }
 
-    function shop_order_column_meta_field_value( $column, $order ) {
-        if ( is_numeric( $order ) ) {
-            $soid = $order;
-        } else {
-            $soid = $order->get_id();
-        }
+    public function shop_order_column_meta_field_value( $column, $order ) {
 
-        if ( $column == 'didar_status' ) {
+        $soid = is_numeric( $order ) ? $order : $order->get_id();
+
+        if ( $column === 'didar_status' ) {
+
             if ( $oid = get_post_meta( $soid, 'didar_id', true ) ) {
+
                 echo '<span class="sent">' . esc_html__( 'Sent', 'didar' ) . '</span>';
             } else {
                 echo '<span class="waiting">' . esc_html__( 'Waiting', 'didar' ) . '</span>';
@@ -138,28 +150,41 @@ class did_hooks {
     }
 
 
-    function didar_send_order() {
+    public function didar_send_order(): void {
+
+        if ( empty( $_POST['oid'] ) ) {
+
+            return;
+        }
+
         if ( $code = get_post_meta( $_POST['oid'], 'didar_id', true ) ) {
             wp_send_json( [ 0, esc_html__( 'This invoice has already been registered.', 'didar' ) ] );
         }
         $didar = didar_api::save_order( $_POST['oid'] );
+
         if ( $didar === false ) {
+
             return;
         }
-        if ( isset( $didar->Error ) or isset( $didar->Message ) ) {
+
+        if ( isset( $didar->Error ) || isset( $didar->Message ) ) {
             update_post_meta( $_POST['oid'], 'didar_msg',
-                    ( isset( $didar->Message ) ? $didar->Message : $didar->Error ) );
-            wp_send_json( [ 0, ( isset( $didar->Message ) ? $didar->Message : $didar->Error ) ] );
+                    ( $didar->Message ?? $didar->Error ) );
+            wp_send_json( [ 0, ( $didar->Message ?? $didar->Error ) ] );
         }
+
         if ( ! is_object( $didar ) ) {
+
             wp_send_json( [ 0, $didar ] );
         }
+
         update_post_meta( $_POST['oid'], 'didar_id', $didar->Id );
         wp_send_json( [ 1, esc_html__( 'The invoice was registered successfully.', 'didar' ) ] );
     }
 
-    function didar_send_all_order() {
+    public function didar_send_all_order(): void {
         global $wpdb;
+
         $opt    = get_option( 'did_option', [] );
         $status = implode( "','", array_keys( $opt['status'] ) );
         $oid    = empty( $_POST['oid'] ) ? 0 : $_POST['oid'];
@@ -176,19 +201,23 @@ class did_hooks {
                 wp_send_json( [ 2, esc_html__( 'Nothing found.', 'didar' ) ] );
             }
             $didar = didar_api::save_order( $row->id );
+
             if ( $didar === false ) {
                 return;
             }
-            if ( isset( $didar->Message ) or isset( $didar->Error ) ) {
+
+            if ( isset( $didar->Message ) || isset( $didar->Error ) ) {
                 update_post_meta( $row->id, 'didar_msg',
-                        ( isset( $didar->Message ) ? $didar->Message : $didar->Error ) );
+                        ( $didar->Message ?? $didar->Error ) );
                 wp_send_json( [
                         0,
-                        ( isset( $didar->Message ) ? $didar->Message : $didar->Error ) . "-$row->id",
+                        ( $didar->Message ?? $didar->Error ) . "-$row->id",
                         $row->id
                 ] );
             }
+
             if ( isset( $didar->Id ) ) {
+
                 update_post_meta( $row->id, 'didar_id', $didar->Id );
                 wp_send_json( [
                         1,
@@ -196,6 +225,7 @@ class did_hooks {
                         $row->id
                 ] );
             }
+
             wp_send_json( [ 0, $didar . "-$row->id", $row->id ] );
 
         } else {
@@ -209,19 +239,23 @@ class did_hooks {
             if ( empty( $row ) ) {
                 wp_send_json( [ 2, esc_html__( 'Nothing found.', 'didar' ) ] );
             }
+
             $didar = didar_api::save_order( $row->ID );
+
             if ( $didar === false ) {
                 return;
             }
-            if ( isset( $didar->Message ) or isset( $didar->Error ) ) {
+
+            if ( isset( $didar->Message ) || isset( $didar->Error ) ) {
                 update_post_meta( $row->ID, 'didar_msg',
-                        ( isset( $didar->Message ) ? $didar->Message : $didar->Error ) );
+                        ( $didar->Message ?? $didar->Error ) );
                 wp_send_json( [
                         0,
-                        ( isset( $didar->Message ) ? $didar->Message : $didar->Error ) . "-$row->ID",
+                        ( $didar->Message ?? $didar->Error ) . "-$row->ID",
                         $row->ID
                 ] );
             }
+
             if ( isset( $didar->Id ) ) {
                 update_post_meta( $row->ID, 'didar_id', $didar->Id );
                 wp_send_json( [
@@ -230,14 +264,14 @@ class did_hooks {
                         $row->ID
                 ] );
             }
+
             wp_send_json( [ 0, $didar . "-$row->ID", $row->ID ] );
-
         }
-
     }
 
-    function didar_bulk_action_mark() {
-    if ( isset( $_GET['page'] ) and $_GET['page'] == 'wc-orders' )
+    public function didar_bulk_action_mark() {
+
+    if ( isset( $_GET['page'] ) || $_GET['page'] === 'wc-orders' )
         ?>
         <script type="text/javascript">
             jQuery('.send_order_didar').click(function () {

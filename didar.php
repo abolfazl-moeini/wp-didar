@@ -13,35 +13,30 @@ Domain Path: /lang
 
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
-function isHPOSenabled() {
-    if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
-        return true;
-    } else {
-        return false;
-    }
+function isHPOSenabled(): bool {
+
+    return OrderUtil::custom_orders_table_usage_is_enabled();
 }
 
-if ( ! defined( 'ds' ) ) {
-    define( 'ds', DIRECTORY_SEPARATOR );
-}
-define( 'did_path', dirname( __file__ ) . ds );
+define( 'DID_PATH', dirname( __file__ ) . '/' );
 
-include_once( did_path . 'inc' . ds . 'functions.php' );
-include_once( did_path . 'inc' . ds . 'didar_api.php' );
-include_once( did_path . 'inc' . ds . 'hooks.php' );
-include_once( did_path . 'inc' . ds . 'paging.php' );
+include_once( DID_PATH . 'inc/functions.php' );
+include_once( DID_PATH . 'inc/didar_api.php' );
+include_once( DID_PATH . 'inc/hooks.php' );
+include_once( DID_PATH . 'inc/paging.php' );
 
 new did_hooks();
 
 
 function did_load_textdomain() {
+
     load_plugin_textdomain( 'didar', false, dirname( plugin_basename( __FILE__ ) ) . '/lang/' );
 }
 
 add_action( 'plugins_loaded', 'did_load_textdomain' );
 
-
 function did_enqueue_admin_css_for_wc_orders() {
+
     //$screen = get_current_screen();
     //if ($screen && $screen->id === 'woocommerce_page_wc-orders') {
     wp_enqueue_style( 'didar-admin-css', plugins_url( 'assets/css/admin.css', __FILE__ ) );
@@ -51,10 +46,12 @@ function did_enqueue_admin_css_for_wc_orders() {
 add_action( 'admin_enqueue_scripts', 'did_enqueue_admin_css_for_wc_orders' );
 
 add_action( 'admin_enqueue_scripts', 'did_plugin_enqueue_scripts' );
+
 function did_plugin_enqueue_scripts() {
-    wp_enqueue_style( 'did-plugin-style', plugins_url( 'css/style.css', __FILE__ ), array(), '1.0' );
-    $inline_css = "#toplevel_page_did_managment img {width: 20px;height: auto;}";
-    wp_add_inline_style( 'did-plugin-style', $inline_css );
+
+    wp_enqueue_style( 'did-plugin-style', plugins_url( 'css/style.css', __FILE__ ), [], '1.0' );
+
+    wp_add_inline_style( 'did-plugin-style', '#toplevel_page_did_managment img {width: 20px;height: auto;}' );
 }
 
 add_action( 'add_meta_boxes', 'did_custom_order_meta_box' );
@@ -71,6 +68,7 @@ function did_custom_order_meta_box() {
 }
 
 function did_custom_order_meta_box_callback( $post ) {
+
     $order = wc_get_order( $post->ID );
     $opt   = get_option( 'did_option', [] );
     ?>
@@ -104,17 +102,22 @@ function did_custom_order_meta_box_callback( $post ) {
 }
 
 add_action( 'woocommerce_process_shop_order_meta', 'did_save_admin_order', 10, 2 );
+
 function did_save_admin_order( $order_id, $order ) {
 
-    if ( ! is_admin() or ! isset( $_POST['didar'] ) ) {
+    if ( ! isset( $_POST['didar'] ) || ! is_admin() ) {
+
         return;
     }
+
     $didar = didar_api::save_order( $order_id );
 
-    if ( isset( $didar->Message ) or isset( $didar->Error ) ) {
+    if ( isset( $didar->Message ) || isset( $didar->Error ) ) {
+
         update_post_meta( $order_id, 'didar_msg',
                 ( isset( $didar->Message ) ? ucfirst( wp_strip_all_tags( $didar->Message ) ) . " [" . $didar->Code . "]" : ucfirst( wp_strip_all_tags( $didar->Error ) ) ) );
     } else {
+
         update_post_meta( $order_id, 'didar_id', $didar->Id );
     }
 
@@ -130,10 +133,10 @@ function didar_send_all_order_function() {
     global $wpdb;
     $opt = get_option( 'did_option', [] );
 
-    if ( $opt['send_type'] == 1 ) {
+    if ( ! empty( $opt['send_type'] ) ) {
 
-        $from   = isset( $opt['order_start'] ) ? $opt['order_start'] : 0;
-        $to     = isset( $opt['order_count'] ) ? $opt['order_count'] : 20;
+        $from   = $opt['order_start'] ?? 0;
+        $to     = $opt['order_count'] ?? 20;
         $status = implode( "','", $opt['status'] );
 
         if ( isHPOSenabled() ) {
@@ -146,16 +149,19 @@ function didar_send_all_order_function() {
                     $status, $from, $to ), ARRAY_A );
 
             if ( ! empty( $rows ) ) {
+
                 foreach ( $rows as $row ) {
+
                     $didar = didar_api::save_order( $row['id'] );
-                    if ( isset( $didar->Message ) or isset( $didar->Error ) ) {
+                    if ( isset( $didar->Message ) || isset( $didar->Error ) ) {
+
                         update_post_meta( $row['id'], 'didar_msg',
-                                ( isset( $didar->Message ) ? $didar->Message : $didar->Error ) );
+                                ( $didar->Message ?? $didar->Error ) );
                     }
                     if ( isset( $didar->Id ) ) {
+
                         update_post_meta( $row['id'], 'didar_id', $didar->Id );
                     }
-
                 }
             }
 
@@ -169,7 +175,9 @@ function didar_send_all_order_function() {
                     $status, $from, $to ), ARRAY_A );
 
             if ( ! empty( $rows ) ) {
+
                 foreach ( $rows as $row ) {
+
                     $didar = didar_api::save_order( $row['ID'] );
                     /*if(isset($didar->Message)or isset($didar->Error)){
                         update_post_meta($row['ID'],'didar_msg',(isset($didar->Message)?$didar->Message:$didar->Error));
@@ -191,10 +199,12 @@ function didar_send_all_order_function() {
 // Schedule the cron event on plugin activation
 register_activation_hook( __FILE__, 'didar_send_all_order_schedule_cron' );
 function didar_send_all_order_schedule_cron() {
+    global $wpdb;
+
     if ( ! wp_next_scheduled( 'didar_send_all_order_cron' ) ) {
         wp_schedule_event( time(), 'hourly', 'didar_send_all_order_cron' );
     }
-    global $wpdb;
+
     $sql = "CREATE TABLE {$wpdb->prefix}didar_error (
         id INT NOT NULL AUTO_INCREMENT,
         order_id INT NOT NULL,
@@ -211,6 +221,8 @@ function didar_send_all_order_schedule_cron() {
 
 // Remove the cron event on plugin deactivation
 register_deactivation_hook( __FILE__, 'didar_send_all_order_remove_cron' );
+
 function didar_send_all_order_remove_cron() {
+
     wp_clear_scheduled_hook( 'didar_send_all_order_cron' );
 }

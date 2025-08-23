@@ -1,12 +1,14 @@
+<?php
+global $wpdb;
+?>
 <div class="wrap">
     <h1><?php esc_attr_e( 'Send to Didar', 'didar' ); ?></h1>
     <p><?php esc_attr_e( 'Send all', 'didar' ); ?> <strong><?php esc_attr_e( 'Completed invoices',
                     'didar' ); ?></strong> <?php esc_attr_e( 'to Didar', 'didar' ); ?></p>
     <?php
-    global $wpdb;
     $opt    = get_option( 'did_option', [] );
     $status = implode( "','", array_keys( $opt['status'] ) );
-    $from   = isset( $opt['order_start'] ) ? $opt['order_start'] : 0;
+    $from   = $opt['order_start'] ?? 0;
 
     if ( isHPOSenabled() ) {
         $cnt = $wpdb->get_var( $wpdb->prepare( "

@@ -1,3 +1,6 @@
+<?php
+global $wpdb, $didar;
+?>
 <h2><?php _e( 'Contact custom fields', 'didar' ); ?></h2>
 <?php
 if ( isset( $_POST['save'] ) ) {
@@ -18,7 +21,6 @@ if ( isset( $_POST['save'] ) ) {
         </thead>
         <tbody>
         <?php
-        global $wpdb, $didar;
         $i         = 0;
         $user_meta = $wpdb->get_col( "select distinct meta_key from $wpdb->usermeta" );
         if ( $fields = get_option( 'didar_field_contact', [] ) ) {

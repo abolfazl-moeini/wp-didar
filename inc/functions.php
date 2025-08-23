@@ -1,6 +1,5 @@
 <?php
 
-
 function did_get_sku( $pid ) {
 	if ( $sku = get_post_meta( $pid, "_sku", true ) ) {
 		return $sku;
@@ -31,6 +30,7 @@ function did_get_sku( $pid ) {
 
 function add_errorlog( $order_id, $path, $params, $output ) {
 	global $wpdb;
+
 	$path   = esc_sql( $path );
 	$output = empty( $output ) ? [] : $output;
 	$params = json_encode( $params, JSON_UNESCAPED_UNICODE );
@@ -50,12 +50,16 @@ function add_errorlog( $order_id, $path, $params, $output ) {
 }
 
 function did_fix_price( $price ) {
-	$opt        = get_option( 'did_option', [] );
-	$price_type = isset( $opt['price_type'] ) ? $opt['price_type'] : 0;
-	if ( get_option( 'woocommerce_currency' ) == 'IRT' and 'IRR' == $price_type ) {
+	$opt = get_option( 'did_option', [] );
+
+	$price_type = $opt['price_type'] ?? 0;
+
+	if ( get_option( 'woocommerce_currency' ) == 'IRT' && 'IRR' == $price_type ) {
+
 		return $price * 10;
 	}
-	if ( get_option( 'woocommerce_currency' ) == 'IRR' and 'IRT' == $price_type ) {
+	if ( get_option( 'woocommerce_currency' ) == 'IRR' && 'IRT' == $price_type ) {
+
 		return $price / 10;
 	}
 
@@ -66,7 +70,8 @@ function did_fix_price( $price ) {
 function did_get_variation_id_by_sku( $sku ) {
 	global $wpdb;
 
-	$variation_id = $wpdb->get_var(
+
+	return $wpdb->get_var(
 		$wpdb->prepare(
 			"SELECT p.ID
             FROM {$wpdb->prefix}posts p
@@ -78,7 +83,5 @@ function did_get_variation_id_by_sku( $sku ) {
 			$sku
 		)
 	);
-
-	return $variation_id;
 }
 

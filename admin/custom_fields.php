@@ -1,10 +1,13 @@
+<?php
+
+$tab = $_GET['tab'] ?? '';
+
+?>
 <div class="wrap">
     <?php
     global $didar;
     $didar = didar_api::get_custom_fields();
-    ?>
-    <?php
-    $url = admin_url( 'admin.php?page=custom_fields' );
+    $url   = admin_url( 'admin.php?page=custom_fields' );
     ?>
     <style>
         .tab {
@@ -31,19 +34,19 @@
     </style>
     <ul class="tab">
         <li><a href="<?php echo $url ?>&tab=contact"
-               class="<?php echo $_GET['tab'] == 'contact' ? 'active' : ''; ?>"><?php _e( 'Contact custom field',
+               class="<?php echo $tab === 'contact' ? 'active' : ''; ?>"><?php _e( 'Contact custom field',
                         'didar' ); ?></a></li>
         <li><a href="<?php echo $url ?>&tab=deal"
-               class="<?php echo $_GET['tab'] == 'deal' ? 'active' : ''; ?>"><?php _e( 'Deal custom field',
+               class="<?php echo $tab === 'deal' ? 'active' : ''; ?>"><?php _e( 'Deal custom field',
                         'didar' ); ?></a></li>
     </ul>
     <div class="contact"><?php
-        if ( $_GET['tab'] == 'contact' ) {
+        if ( $tab === 'contact' ) {
             include_once( 'custom_fields_contact.php' );
         }
         ?></div>
     <div class="deal"><?php
-        if ( $_GET['tab'] != 'contact' ) {
+        if ( $tab !== 'contact' ) {
             include_once( 'custom_fields_deal.php' );
         }
         ?></div>

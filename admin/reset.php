@@ -1,3 +1,6 @@
+<?php
+global $wpdb;
+?>
 <div class="wrap">
     <h2>ریست وبسرویس</h2>
     <p><?php _e( 'You can rest didar webservice on this section with 2 type', 'didar' ); ?></p>
@@ -5,7 +8,6 @@
                 'didar' ); ?></p>
     <p><?php _e( '2.Reset webservice and start send order from order id you enter in input text', 'didar' ); ?></p>
     <?php
-    global $wpdb;
     if ( isset( $_POST['reset'] ) ) {
         if ( is_numeric( $_POST['order_id'] ) ) {
             $wpdb->query( "delete from {$wpdb->postmeta} where meta_key in('didar_id','didar_msg') and post_id>='{$_POST['order_id']}'" );

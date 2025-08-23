@@ -3,7 +3,7 @@ function did_paging( &$query, $cnt = 10 ) {
 
     $count = $cnt;
     $page  = 0;
-    if ( isset( $_POST['paging'] ) or isset( $_POST['__paging'] ) ) {
+    if ( isset( $_POST['paging'] ) || isset( $_POST['__paging'] ) ) {
         $page = isset( $_POST['paging'] ) ? array_keys( $_POST['paging'] )[0] : $_POST['__paging'];
     }
     $max_page = intval( count( $query ) / $count );
@@ -90,7 +90,7 @@ function did_paging( &$query, $cnt = 10 ) {
         <input type="hidden" name="__paging" value="<?php echo absint( $page ) ?>"/>
     </ul>
     <?php
+
     return ob_get_clean();
 }
 
-?>

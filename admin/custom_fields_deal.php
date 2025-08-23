@@ -1,3 +1,6 @@
+<?php
+global $wpdb, $didar;
+?>
 <h2><?php _e( 'Deals custom fields', 'didar' ); ?></h2>
 <?php
 if ( isset( $_POST['save'] ) ) {
@@ -18,7 +21,6 @@ if ( isset( $_POST['save'] ) ) {
         </thead>
         <tbody>
         <?php
-        global $wpdb, $didar;
         $i          = 0;
         $order_meta = $wpdb->get_col( "select distinct meta_key from $wpdb->postmeta join $wpdb->posts on ID=post_id and post_type='shop_order'" );
         if ( $fields = get_option( 'didar_field_deal', [] ) ) {
