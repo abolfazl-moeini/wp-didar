@@ -10,7 +10,9 @@ global $wpdb;
     <?php
     if ( isset( $_POST['reset'] ) ) {
         if ( is_numeric( $_POST['order_id'] ) ) {
-            $wpdb->query( "delete from {$wpdb->postmeta} where meta_key in('didar_id','didar_msg') and post_id>='{$_POST['order_id']}'" );
+            $wpdb->query( $wpdb->prepare(
+                    "delete from {$wpdb->postmeta} where meta_key in('didar_id','didar_msg') and post_id>=%d", $_POST['order_id']
+            ) );
         } else {
             $wpdb->query( "delete from {$wpdb->postmeta} where meta_key in('didar_id','didar_msg')" );
         }
