@@ -33,7 +33,7 @@ class did_hooks {
 
             $url = admin_url( 'admin.php?page=custom_fields' );
 
-            if ( ! isset( $_GET['tab'] ) && ! in_array( $_GET['tab'], [ 'contact', 'deal' ] ) ) {
+            if ( ! isset( $_GET['tab'] ) || ! in_array( $_GET['tab'], [ 'contact', 'deal' ] ) ) {
 
                 wp_redirect( "$url&tab=contact" );
                 exit;
@@ -271,7 +271,7 @@ class did_hooks {
 
     public function didar_bulk_action_mark() {
 
-    if ( isset( $_GET['page'] ) || $_GET['page'] === 'wc-orders' )
+    if ( isset( $_GET['page'] ) && $_GET['page'] === 'wc-orders' )
         ?>
         <script type="text/javascript">
             jQuery('.send_order_didar').click(function () {
