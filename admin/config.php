@@ -185,8 +185,58 @@
                 </td>
             </tr>
         </table>
-        <input type="submit" name="save" value="<?php esc_attr_e( 'Save settings', 'didar' ); ?>"
-               class="button-primary save_btn"/>
+        <?php
+
+        $didar_product_cats = get_terms( [
+                'taxonomy'   => 'product_cat',
+                'hide_empty' => false,
+        ] );
+        ?>
+
+        <hr style="margin:24px 0" />
+        <h3><?php _e( 'WooCommerce Product Category Mapping', 'didar' ); ?></h3>
+        <p><?php _e( 'Map each WooCommerce product category to one of didar product categories.', 'didar' ); ?></p>
+
+        <table class="widefat striped">
+            <thead>
+            <tr>
+                <th style="width:40%"><?php _e( 'Category', 'didar' ); ?></th>
+                <th><?php _e( 'Mapped Category', 'didar' ); ?></th>
+            </tr>
+            </thead>
+            <tbody>
+            <?php if ( ! empty( $didar_product_cats ) && ! is_wp_error( $didar_product_cats )  ) : ?>
+                <?php foreach ( $didar_product_cats as $cat ) :
+                    $selected = $opt['category_map'][ $cat->term_id ] ?? '';
+                    ?>
+                    <tr>
+                        <td>
+                            <strong><?php echo esc_html( $cat->name ); ?></strong>
+                            <br>(ID: <?php echo (int) $cat->term_id; ?>)
+                        </td>
+                        <td>
+                            <select name="category_map[<?php echo (int) $cat->term_id; ?>]" style="min-width:220px;">
+                                <option value=""> - </option>
+                                <?php foreach ( didar_api::get_category() as $val => $label ) : ?>
+                                    <option value="<?php echo esc_attr( $val ); ?>" <?php selected( $selected, $val ); ?>>
+                                        <?php echo esc_html( $label ); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+            <?php else : ?>
+                <tr><td colspan="2"><?php _e( 'No product categories found.', 'didar' ); ?></td></tr>
+            <?php endif; ?>
+            </tbody>
+        </table>
+
+        <div class="submit">
+
+            <input type="submit" name="save" value="<?php esc_attr_e( 'Save Settings', 'didar' ); ?>"
+                   class="button-primary save_btn"/>
+        </div>
     </form>
 </div>
 <script>

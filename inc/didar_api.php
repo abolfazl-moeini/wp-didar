@@ -146,7 +146,7 @@ class didar_api {
 			'Unit'              => 'IRR',
 			'Description'       => '',
 			'TitleForInvoice'   => $title,
-			'ProductCategoryId' => '313180cb-29c4-45ec-918c-aecc3229c3af',
+			'ProductCategoryId' => didar_get_mapped_id_from_order_item( $item ),
 			'Variants'          => []
 		];
 
@@ -213,9 +213,14 @@ class didar_api {
 		return [ get_post_meta( $item->get_product_id(), 'didar_id', true ), $var_id ];
 	}
 
-	public static function get_category() {
+	public static function get_category(): array {
 
-		return self::send_request( 'product/categories', [] )->Response;
+		if ( $request = self::send_request( 'product/categories', [] ) ) {
+
+			return array_column( $request->Response, 'Title', 'Id' );
+		}
+
+		return [];
 	}
 
 	public static function create_order( $args = [] ) {
