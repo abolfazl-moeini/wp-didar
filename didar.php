@@ -15,7 +15,9 @@ use Automattic\WooCommerce\Utilities\OrderUtil;
 
 function did_is_HPOS_enabled(): bool {
 
-    return OrderUtil::custom_orders_table_usage_is_enabled();
+    $callback = [ OrderUtil::class, 'custom_orders_table_usage_is_enabled' ];
+
+    return is_callable( $callback ) && $callback();
 }
 
 define( 'DID_PATH', dirname( __file__ ) . '/' );

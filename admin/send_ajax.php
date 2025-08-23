@@ -7,7 +7,7 @@ global $wpdb;
                     'didar' ); ?></strong> <?php esc_attr_e( 'to Didar', 'didar' ); ?></p>
     <?php
     $opt    = get_option( 'did_option', [] );
-    $status = implode( "','", array_keys( $opt['status'] ) );
+    $status = implode( "','", array_keys( $opt['status'] ?? [] ) );
     $from   = $opt['order_start'] ?? 0;
 
     if ( did_is_HPOS_enabled() ) {

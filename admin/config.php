@@ -194,8 +194,8 @@
     (function ($) {
         var parentSelect = $("#parentSelect");
         var childSelect = $("#childSelect");
-        var selectedParentValue = "<?php echo esc_attr( $opt['parent_kariz'] ); ?>";
-        var selectedChildValue = "<?php echo esc_attr( $opt['kariz'] ); ?>";
+        var selectedParentValue = "<?php echo esc_attr( $opt['parent_kariz'] ?? '' ); ?>";
+        var selectedChildValue = "<?php echo esc_attr( $opt['kariz'] ?? '' ); ?>";
 
 
         kariz.forEach(function (item) {

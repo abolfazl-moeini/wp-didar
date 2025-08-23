@@ -18,7 +18,13 @@ class didar_api {
 		$resp = curl_exec($ch);
 		return json_decode($resp);*/
 
-		$opt  = get_option( 'did_option', [] );
+		$opt = get_option( 'did_option', [] );
+
+		if ( empty( $opt['didar_api'] ) ) {
+
+			return null;
+		}
+
 		$url  = "https://app.didar.me/api/$router?apikey={$opt['didar_api']}";
 		$args = array(
 			'method'    => 'POST',
@@ -48,12 +54,23 @@ class didar_api {
 	}
 
 
-	public static function get_kariz_list() {
-		return self::send_request( 'pipeline/list/0', [] )->Response;
+	public static function get_kariz_list(): array {
+
+		if ( $request = self::send_request( 'pipeline/list/0', [] ) ) {
+
+			return $request->Response;
+		}
+
+		return [];
 	}
 
-	public static function get_user_list() {
-		return self::send_request( 'User/List', [] )->Response;
+	public static function get_user_list(): array {
+
+		if ( $request = self::send_request( 'User/List', [] ) ) {
+			return $request->Response;
+		}
+
+		return [];
 	}
 
 
