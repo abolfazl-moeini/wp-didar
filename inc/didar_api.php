@@ -139,14 +139,6 @@ class didar_api {
 			return empty( $product->ProductId ) ? [ $product->Id, null ] : [ $product->ProductId, $product->Id ];
 		}
 
-		/*if($product = get_post_meta( $item->get_product_id(), 'didar_id', true )){
-			if($variant = get_post_meta( $item->get_variation_id(), 'didar_id', true ))
-				return [$product,$variant];
-			else if(empty($item->get_variation_id()))
-				return [$product,null];
-		}*/
-
-
 		$title = get_the_title( $item->get_product_id() );
 		$args  = [
 			'Title'             => $title,
@@ -168,7 +160,6 @@ class didar_api {
 
 			$args['Id'] = $didar;
 		}
-
 
 		$variations = $wpdb->get_results( $wpdb->prepare( "select * from $wpdb->posts where post_type='product_variation' and post_status='publish' and post_parent= %d",
 			$item->get_product_id() ) );
