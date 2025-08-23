@@ -3,7 +3,7 @@
 Plugin Name: Didar
 Plugin URI: https://didar.me/
 Description: Connect your Woocommerce website to Didar CRM
-Version: 1.1
+Version: 1.2
 Author: Didar
 Author URI: https://didar.me/
 Text Domain: didar
