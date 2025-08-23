@@ -57,7 +57,7 @@ if ( isset( $_POST['save'] ) ) {
         <tr>
             <td colspan="3">
                 <button class="button-primary" name="save" type="submit"><span
-                            class="dashicons dashicons-saved"> </span> <?php _e( 'save custom fields', 'didar' ); ?>
+                            class="dashicons dashicons-saved"> </span> <?php _e( 'Save Custom Fields', 'didar' ); ?>
                 </button>
             </td>
         </tr>
