@@ -6,18 +6,6 @@ class didar_api {
 
 	private static function send_request( $router, $params = [] ) {
 
-		/*$opt = get_option( 'did_option', [] );
-		$ch  = curl_init("https://app.didar.me/api/$router?apikey={$opt['didar_api']}");
-		curl_setopt( $ch, CURLOPT_POST, 1);
-		curl_setopt( $ch, CURLOPT_FOLLOWLOCATION, 0);
-		curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, 0);
-		curl_setopt( $ch, CURLOPT_SSL_VERIFYHOST, 0);
-		curl_setopt( $ch, CURLOPT_POSTFIELDS, json_encode($params,JSON_UNESCAPED_UNICODE));
-		curl_setopt( $ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
-		curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
-		$resp = curl_exec($ch);
-		return json_decode($resp);*/
-
 		$opt = get_option( 'did_option', [] );
 
 		if ( empty( $opt['didar_api'] ) ) {

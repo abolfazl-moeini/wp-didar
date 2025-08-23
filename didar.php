@@ -29,7 +29,6 @@ include_once( DID_PATH . 'inc/paging.php' );
 
 new did_hooks();
 
-
 function did_load_textdomain() {
 
     load_plugin_textdomain( 'didar', false, dirname( plugin_basename( __FILE__ ) ) . '/lang/' );
