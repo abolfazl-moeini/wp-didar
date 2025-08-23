@@ -7,6 +7,10 @@
     if ( isset( $_POST['save'] ) && wp_verify_nonce( $_POST['didar_settings_nonce'], 'didar_settings' ) ) {
 
         $_POST['status']['wc-completed'] = 1;
+
+        /**
+         * @FIX update filtered values
+         */
         update_option( 'did_option', $_POST );
 
         echo '<div id="setting-error-settings_updated" class="notice notice-success settings-error is-dismissible"><p><strong>' . esc_html__( 'Settings saved',

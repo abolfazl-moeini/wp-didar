@@ -261,6 +261,9 @@ class didar_api {
 					],
 				]
 			],
+			/**
+			 * @FIX undefined
+			 */
 			'Fields'         => $fields,
 		];
 
