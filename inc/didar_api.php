@@ -155,7 +155,6 @@ class didar_api {
 			$args['UnitPrice'] = did_fix_price( $item->get_subtotal() );
 		}
 
-
 		if ( $didar = get_post_meta( $item->get_product_id(), 'didar_id', true ) ) {
 
 			$args['Id'] = $didar;
@@ -263,9 +262,9 @@ class didar_api {
 				]
 			],
 			/**
-			 * @FIX undefined
+			 * todo: map fields
 			 */
-			'Fields'         => $fields,
+			'Fields'         => [],
 		];
 
 		if ( $cfield = get_option( 'didar_field_contact', [] ) ) {
