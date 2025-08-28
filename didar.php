@@ -134,64 +134,64 @@ function didar_send_all_order_function() {
     global $wpdb;
     $opt = get_option( 'did_option', [] );
 
-    if ( ! empty( $opt['send_type'] ) ) {
+    if ( ! isset( $opt['send_type'] ) || $opt['send_type'] !== 'auto' ) {
 
-        $from   = $opt['order_start'] ?? 0;
-        $to     = $opt['order_count'] ?? 20;
-        $status = implode( "','", $opt['status'] );
+        return '';
+    }
 
-        if ( did_is_HPOS_enabled() ) {
+    $from   = $opt['order_start'] ?? 0;
+    $to     = $opt['order_count'] ?? 20;
+    $status = implode( "','", $opt['status'] );
 
-            $rows = $wpdb->get_results( $wpdb->prepare( "
+    if ( did_is_HPOS_enabled() ) {
+
+        $rows = $wpdb->get_results( $wpdb->prepare( "
 		select * from {$wpdb->prefix}wc_orders o 
 		where o.type='shop_order' and o.status in(%s) 
 		and o.id> %d and NOT EXISTS(select post_id from $wpdb->postmeta where post_id=o.id and meta_key='didar_id' and meta_value<>'') 
 		order by id limit %s",
-                    $status, $from, $to ), ARRAY_A );
+                $status, $from, $to ), ARRAY_A );
 
-            if ( ! empty( $rows ) ) {
+        if ( ! empty( $rows ) ) {
 
-                foreach ( $rows as $row ) {
+            foreach ( $rows as $row ) {
 
-                    $didar = didar_api::save_order( $row['id'] );
-                    if ( isset( $didar->Message ) || isset( $didar->Error ) ) {
+                $didar = didar_api::save_order( $row['id'] );
+                if ( isset( $didar->Message ) || isset( $didar->Error ) ) {
 
-                        update_post_meta( $row['id'], 'didar_msg',
-                                ( $didar->Message ?? $didar->Error ) );
-                    }
-                    if ( isset( $didar->Id ) ) {
+                    update_post_meta( $row['id'], 'didar_msg',
+                            ( $didar->Message ?? $didar->Error ) );
+                }
+                if ( isset( $didar->Id ) ) {
 
-                        update_post_meta( $row['id'], 'didar_id', $didar->Id );
-                    }
+                    update_post_meta( $row['id'], 'didar_id', $didar->Id );
                 }
             }
+        }
 
-        } else {
+    } else {
 
-            $rows = $wpdb->get_results( $wpdb->prepare( "
+        $rows = $wpdb->get_results( $wpdb->prepare( "
 		select * from {$wpdb->prefix}posts o 
 		where o.post_type='shop_order' and o.post_status in(%s) 
 		and o.ID> %d and NOT EXISTS(select post_id from $wpdb->postmeta where post_id=o.ID and meta_key='didar_id' and meta_value<>'') 
 		order by ID limit %d",
-                    $status, $from, $to ), ARRAY_A );
+                $status, $from, $to ), ARRAY_A );
 
-            if ( ! empty( $rows ) ) {
+        if ( ! empty( $rows ) ) {
 
-                foreach ( $rows as $row ) {
+            foreach ( $rows as $row ) {
 
-                    $didar = didar_api::save_order( $row['ID'] );
-                    /*if(isset($didar->Message)or isset($didar->Error)){
-                        update_post_meta($row['ID'],'didar_msg',(isset($didar->Message)?$didar->Message:$didar->Error));
-                    }*/
-                    if ( isset( $didar->Id ) ) {
-                        update_post_meta( $row['ID'], 'didar_id', $didar->Id );
-                    }
-
+                $didar = didar_api::save_order( $row['ID'] );
+                /*if(isset($didar->Message)or isset($didar->Error)){
+                    update_post_meta($row['ID'],'didar_msg',(isset($didar->Message)?$didar->Message:$didar->Error));
+                }*/
+                if ( isset( $didar->Id ) ) {
+                    update_post_meta( $row['ID'], 'didar_id', $didar->Id );
                 }
+
             }
-
         }
-
 
     }
 }

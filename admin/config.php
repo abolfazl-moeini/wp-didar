@@ -17,9 +17,9 @@
                         'didar' ) . '</strong></p></div>';
     }
     $opt         = get_option( 'did_option', [] );
-    $status      = empty( $opt['status'] ) ? [] : $opt['status'];
-    $type        = empty( $opt['send_type'] ) ? 1 : $opt['send_type'];
-    $soid        = empty( $opt['soid'] ) ? '' : $opt['soid'];
+    $status      = $opt['status'] ?? [];
+    $type        = $opt['send_type'] ?? 1;
+    $soid        = $opt['soid'] ?? '';
     $nonce       = wp_create_nonce( 'didar_settings' );
     $sku         = $opt['sku'] ?? 0;
     $same_person = $opt['same_person'] ?? 0;
@@ -53,9 +53,9 @@
             <tr>
                 <td><?php esc_attr_e( 'Send Type', 'didar' ); ?></td>
                 <td>
-                    <input type="radio" name="send_type" value="1" <?php echo checked( '1', $type ) ?>/>
+                    <input type="radio" name="send_type" value="auto" <?php echo checked( true, $type !== 'auto') ?>/>
                     <label><?php esc_attr_e( 'Auto', 'didar' ); ?></label><br/>
-                    <input type="radio" name="send_type" value="2" <?php echo checked( '2', $type ) ?>/>
+                    <input type="radio" name="send_type" value="manual" <?php echo checked( true, $type !== 'auto' ) ?>/>
                     <label><?php esc_attr_e( 'Manual', 'didar' ); ?></label><br/>
                 </td>
             </tr>
@@ -218,7 +218,8 @@
                             <select name="category_map[<?php echo (int) $cat->term_id; ?>]" style="min-width:220px;">
                                 <option value=""> - </option>
                                 <?php foreach ( didar_api::get_category() as $val => $label ) : ?>
-                                    <option value="<?php echo esc_attr( $val ); ?>" <?php selected( $selected, $val ); ?>>
+                                    <option value="<?php echo esc_attr( $val ); ?>" <?php selected( $selected,
+                                            $val ); ?>>
                                         <?php echo esc_html( $label ); ?>
                                     </option>
                                 <?php endforeach; ?>
@@ -227,7 +228,9 @@
                     </tr>
                 <?php endforeach; ?>
             <?php else : ?>
-                <tr><td colspan="2"><?php _e( 'No product categories found.', 'didar' ); ?></td></tr>
+                <tr>
+                    <td colspan="2"><?php _e( 'No product categories found.', 'didar' ); ?></td>
+                </tr>
             <?php endif; ?>
             </tbody>
         </table>
